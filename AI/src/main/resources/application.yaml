@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: AI
+#groq.api.key=${GROQ_API_KEY} musia?em zakomnetowa? bo nie mam klucza
+

@@ -14,5 +14,4 @@ public class RecommendationRequest {
     private BigDecimal maxPrice;
     private String city;
     private Integer rooms;
-    private Float area;
 }

@@ -1,32 +1,36 @@
 package com.example.AI.Controllers;
 
+import com.example.AI.Microservices.ApartmentClient;
 import com.example.AI.Payloads.Requests.PriceCityRequest;
 import com.example.AI.Payloads.Requests.PriceEstimateRequest;
 import com.example.AI.Payloads.Requests.PriceRateRequest;
 import com.example.AI.Payloads.Requests.PriceTrendRequest;
+import com.example.AI.Payloads.Responses.ApartmentDTO;
 import com.example.AI.Payloads.Responses.GroqResponse;
 import com.example.AI.Services.GroqService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.util.Json;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/ai")
+@CrossOrigin(origins = "http://localhost:3000/", maxAge = 3600)
 public class GroqController {
 
     private final GroqService groqService;
+    private final ApartmentClient apartmentClient;
 
-    public GroqController(GroqService groqService) {
+    public GroqController(GroqService groqService, ApartmentClient apartmentClient) {
         this.groqService = groqService;
+        this.apartmentClient = apartmentClient;
     }
 
     @PostMapping("/rate_price")
@@ -58,10 +62,16 @@ public class GroqController {
         ProcessBuilder processBuilder = new ProcessBuilder("python", "recommendation.py");
         processBuilder.redirectErrorStream(true);
 
+        List<ApartmentDTO> apartments = apartmentClient.getApartments();
+
         Process process = processBuilder.start();
 
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put("priceRateRequest", priceRateRequest);
+        inputData.put("apartments", apartments);
+
         ObjectMapper objectMapper = new ObjectMapper();
-        String inputJson = objectMapper.writeValueAsString(priceRateRequest);
+        String inputJson = objectMapper.writeValueAsString(inputData);
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
             writer.write(inputJson);

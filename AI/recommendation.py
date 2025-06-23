@@ -43,9 +43,9 @@ def main():
     input_json = sys.stdin.read()
     data = json.loads(input_json)
 
-    price_rate = data["priceRateRequest"]
+    recommendation = data["recommendationRequest"]
     apartments = data["apartments"]
-    city = cities[price_rate['location']]
+    city = cities[recommendation['location']]
 
     for apartment in apartments:
         temp = []
@@ -53,8 +53,8 @@ def main():
         lon = abs(apartment['longitude'] - city['longitude']) * 111
         distance = (lat ** 2 + lon ** 2) ** 0.5
         temp.append(trapezoidal(city['radius'], distance))
-        temp.append(trapezoidal(apartment['price'], price_rate['price']))
-        temp.append(triangular(int(price_rate['rooms']) - 1, int(price_rate['rooms']), int(price_rate['rooms']) + 1, apartment['rooms']))
+        temp.append(trapezoidal(apartment['price'], recommendation['price']))
+        temp.append(triangular(int(recommendation['rooms']) - 1, int(recommendation['rooms']), int(recommendation['rooms']) + 1, apartment['rooms']))
         score = min(temp)
         results.append((apartment['id'], score))
 

@@ -1,10 +1,8 @@
 package com.example.AI.Controllers;
 
+import com.example.AI.Exceptions.RecommendationException;
 import com.example.AI.Microservices.ApartmentClient;
-import com.example.AI.Payloads.Requests.PriceCityRequest;
-import com.example.AI.Payloads.Requests.PriceEstimateRequest;
-import com.example.AI.Payloads.Requests.PriceRateRequest;
-import com.example.AI.Payloads.Requests.PriceTrendRequest;
+import com.example.AI.Payloads.Requests.*;
 import com.example.AI.Payloads.Responses.ApartmentDTO;
 import com.example.AI.Payloads.Responses.GroqResponse;
 import com.example.AI.Services.GroqService;
@@ -58,7 +56,7 @@ public class GroqController {
     }
 
     @PostMapping("/recommendation")
-    public ResponseEntity<Object> recommend(@RequestBody PriceRateRequest priceRateRequest) throws IOException, InterruptedException {
+    public ResponseEntity<Object> recommend(@RequestBody RecommendationRequest recommendationRequest) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder("python", "recommendation.py");
         processBuilder.redirectErrorStream(true);
 
@@ -67,7 +65,7 @@ public class GroqController {
         Process process = processBuilder.start();
 
         Map<String, Object> inputData = new HashMap<>();
-        inputData.put("priceRateRequest", priceRateRequest);
+        inputData.put("recommendationRequest", recommendationRequest);
         inputData.put("apartments", apartments);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -85,7 +83,7 @@ public class GroqController {
         int exitCode = process.waitFor();
 
         if (exitCode != 0) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Błąd w Pythonie");
+            throw new RecommendationException("Recommendation script failed with exit code " + exitCode);
         }
 
         Object response = objectMapper.readValue(outputJson, Object.class);
@@ -93,6 +91,4 @@ public class GroqController {
 
         return ResponseEntity.ok(response);
     }
-
-
 }

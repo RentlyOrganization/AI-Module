@@ -1,5 +1,6 @@
 package com.example.AI.Services;
 
+import com.example.AI.Exceptions.GroqApiException;
 import com.example.AI.Payloads.Requests.PriceCityRequest;
 import com.example.AI.Payloads.Requests.PriceEstimateRequest;
 import com.example.AI.Payloads.Requests.PriceRateRequest;
@@ -72,7 +73,6 @@ public class GroqService {
                 .map(responseJson -> {
                     try {
                         JsonNode root = objectMapper.readTree(responseJson);
-                        // Wydobycie tekstu z choices[0].message.content
                         return root.get("choices")
                                 .get(0)
                                 .get("message")
@@ -80,8 +80,7 @@ public class GroqService {
                                 .asText()
                                 .trim();
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        return "Failed to parse response";
+                        throw new GroqApiException("Failed to parse response from Groq");
                     }
                 })
                 .block();
@@ -114,8 +113,7 @@ public class GroqService {
                                 .asText()
                                 .trim();
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        return "Failed to parse response";
+                        throw new GroqApiException("Failed to parse response from Groq");
                     }
                 })
                 .block();
@@ -144,8 +142,7 @@ public class GroqService {
                                 .asText()
                                 .trim();
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        return "Failed to parse response";
+                        throw new GroqApiException("Failed to parse response from Groq");
                     }
                 })
                 .block();
@@ -170,8 +167,7 @@ public class GroqService {
                                 .asText()
                                 .trim();
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        return "Failed to parse response";
+                        throw new GroqApiException("Failed to parse response from Groq");
                     }
                 })
                 .block();
